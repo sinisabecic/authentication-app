@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import toast from "react-hot-toast";
-
+import { auth as authService } from "../auth/authService";
 import {
   faCheck,
   faTimes,
@@ -8,7 +8,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { auth } from "../services/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { Navigate, useNavigate } from "react-router-dom";
 
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
@@ -25,7 +25,7 @@ const Register = () => {
   //   const successRef = useRef();
   const errRef = useRef();
 
-  const [user, setUser] = useState(""); // Name
+  const [username, setUsername] = useState(""); // Username
   const [validName, setValidName] = useState(false);
   const [userFocus, setUserFocus] = useState(false);
 
@@ -51,8 +51,8 @@ const Register = () => {
   }, []);
 
   useEffect(() => {
-    setValidName(USER_REGEX.test(user));
-  }, [user]);
+    setValidName(USER_REGEX.test(username));
+  }, [username]);
 
   useEffect(() => {
     setValidEmail(EMAIL_REGEX.test(email));
@@ -66,7 +66,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const v1 = USER_REGEX.test(user);
+    const v1 = USER_REGEX.test(username);
     const v2 = PWD_REGEX.test(pwd);
     const v3 = EMAIL_REGEX.test(email);
     if (!v1 || !v2 || !v3) {
@@ -76,37 +76,33 @@ const Register = () => {
 
     setSubmitDisabled(true); //disable button
 
-    await createUserWithEmailAndPassword(auth, email, pwd)
-      .then((res) => {
+    createUserWithEmailAndPassword(auth, email, pwd)
+      .then(async (res) => {
         setSubmitDisabled(false);
 
         const user = res.user;
+        await updateProfile(user, {
+          displayName: username,
+        });
+
         console.log(user);
         console.log("Access token: ", user.accessToken);
         // ...
         setSuccess(true);
-        setUser("");
+        setUsername("");
         setEmail("");
         setPwd("");
         setMatchPwd("");
         // setSuccessMsg("Registration success");
         toast.success("Registration success");
         // navigate("/login");
+        authService.setJwt(user.accessToken);
       })
       .catch((error) => {
         setSubmitDisabled(false);
-        if (!error.res) {
-          setErrMsg("No Server Response");
-          console.log("Error code: " + error.code);
-          console.log("Error message: " + error.message);
-        } else if (error.res.status === 409) {
-          setErrMsg("That email exist");
-          console.log("Error code: " + error.code);
-          console.log("Error message: " + error.message);
-        } else {
-          setErrMsg("Registration Failed");
-          console.log("Error code: " + error.code);
-          console.log("Error message: " + error.message);
+        if (error) {
+          setErrMsg("Registration failed");
+          console.log(error?.message);
         }
         errRef.current.focus();
       });
@@ -134,14 +130,14 @@ const Register = () => {
         <h1>Register</h1>
         <form onSubmit={handleSubmit}>
           <label htmlFor="username">
-            Name:
+            Username:
             <FontAwesomeIcon
               icon={faCheck}
               className={validName ? "valid" : "hide"}
             />
             <FontAwesomeIcon
               icon={faTimes}
-              className={validName || !user ? "hide" : "invalid"}
+              className={validName || !username ? "hide" : "invalid"}
             />
           </label>
           <input
@@ -149,8 +145,8 @@ const Register = () => {
             id="username"
             ref={userRef}
             autoComplete="off"
-            onChange={(e) => setUser(e.target.value)}
-            value={user}
+            onChange={(e) => setUsername(e.target.value)}
+            value={username}
             required
             aria-invalid={validName ? "false" : "true"}
             aria-describedby="uidnote"
@@ -160,7 +156,7 @@ const Register = () => {
           <p
             id="uidnote"
             className={
-              userFocus && user && !validName ? "instructions" : "offscreen"
+              userFocus && username && !validName ? "instructions" : "offscreen"
             }
           >
             <FontAwesomeIcon icon={faInfoCircle} />

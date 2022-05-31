@@ -14,6 +14,11 @@ class AuthService {
     return this.isAuthenticated;
   };
 
+  setJwt = (token) => {
+    // apiUsers.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    localStorage.setItem("accesToken", token);
+  };
+
   async login() {}
 
   logout = () => {};
