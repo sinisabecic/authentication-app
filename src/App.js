@@ -1,23 +1,67 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import { Toaster } from "react-hot-toast";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  NavLink,
+} from "react-router-dom";
+
+import Home from "./components/Home";
+import Login from "./components/Login";
+import Register from "./components/Register";
+// import { auth } from "./auth/authService";
 
 function App() {
+  // const [isAuth, setIsAuth] = useState(auth.getAuthStatus());
+
+  // const toggleAuth = (status) => {
+  //   if (!status) {
+  //     auth.logout();
+  //   }
+  //   setIsAuth(status);
+  // };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <Toaster />
+      <Router>
+        <nav className="nav bg-dark justify-content-start">
+          <NavLink className="nav-link" to="/">
+            Home
+          </NavLink>
+
+          {/* {isAuth ? (
+            <a className="nav-link" onClick={() => toggleAuth(false)}>
+              Logout
+            </a>
+          ) : (
+            <NavLink className="nav-link" to="/login">
+              Login
+            </NavLink>
+          )} */}
+
+          <NavLink className="nav-link" to="/login">
+            Login
+          </NavLink>
+
+          <NavLink className="nav-link" to="/register">
+            Register
+          </NavLink>
+        </nav>
+
+        <Routes>
+          <Route path="/" element={<Home />} />
+
+          {/* <Route
+            path="/login"
+            element={<Login toggleAuth={toggleAuth}></Login>}
+          /> */}
+
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Routes>
+      </Router>
     </div>
   );
 }
