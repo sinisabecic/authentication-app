@@ -9,7 +9,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { auth } from "../services/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
@@ -78,6 +78,7 @@ const Register = () => {
 
     createUserWithEmailAndPassword(auth, email, pwd)
       .then(async (res) => {
+        auth.signOut();
         setSubmitDisabled(false);
 
         const user = res.user;
@@ -95,10 +96,10 @@ const Register = () => {
         setMatchPwd("");
         // setSuccessMsg("Registration success");
         toast.success("Registration success");
-        // navigate("/login");
-        authService.setJwt(user.accessToken);
+        navigate("/login");
       })
       .catch((error) => {
+        auth.signOut();
         setSubmitDisabled(false);
         if (error) {
           setErrMsg("Registration failed");

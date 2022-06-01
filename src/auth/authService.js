@@ -16,7 +16,7 @@ class AuthService {
 
   setJwt = (token) => {
     // apiUsers.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    localStorage.setItem("accesToken", token);
+    localStorage.setItem("accessToken", token);
   };
 
   async login() {}
